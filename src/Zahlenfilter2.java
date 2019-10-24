@@ -27,7 +27,6 @@ public class Zahlenfilter2 {
         }
 
         Visitenkarte vis = new Visitenkarte();
-        vis.toString();
         System.out.println(vis);
 
 
