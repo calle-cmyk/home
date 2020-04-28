@@ -20,7 +20,7 @@ dbPassword='password'
 
 
 #OPTIONEN / vielleicht eine mit last_backup / Größe des Online Contents ohne Datenbanken
-# / login Daten editieren
+
 
 while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do
   case $1 in
@@ -28,10 +28,15 @@ while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do
       -f | --ftp )    cat wget_backup.sh | sed -n -e 12,/path/p
                         exit 0 ;;
 
-      -e | --edit )     echo "user= "
-                        read newuser
+      -l | --last )
+                      stat -c "Filename : %n
+                      atime    : %x
+                      mtime    : %y
+                      ctime    : %z
 
-                        ;;
+                      " *
+                        exit 0 ;; #anhängen als Kommentar
+
 
   esac
   shift
@@ -64,7 +69,6 @@ while [[ -n $1 ]] ; do
 
   read -p "Press [Enter] key to start backup ... - reset with strg+c"
 
-  echo "Create the Backup ... "
 
 #-r rekursiver Download
 #-l level Tiefe 0=unlimit
@@ -74,6 +78,7 @@ while [[ -n $1 ]] ; do
 #-q quiet keine Statusmeldungen
 #--cut-dirs 'number' eltern verzeichnisse ignorieren
   echo wget -r -l 0 -nH -np -nc --cut-dirs=2 ftp://$user:$pass@$ftp_server$path
+  date > date.txt
 
 # ein Verzeichnis zurück sonst wird es nicht gefunden
   cd ..
