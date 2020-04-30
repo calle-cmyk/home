@@ -9,24 +9,17 @@
 #-------------------------
 
 #Variablen müssen für die jeweilige Seiten geändert werden.
-user=***
-pass=***
-ftp_server=****
-path="/public_html/wordpress/wp-admin"
-
-wordpressDatabase='wordpress_db'
-dbUser='wordpress_db_user'
-dbPassword='password'
 
 
-#OPTIONEN / vielleicht eine mit last_backup / Größe des Online Contents ohne Datenbanken
 
+#OPTIONEN 
 
 while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do
   case $1 in
 
       -f | --ftp )    cat wget_backup.sh | sed -n -e 12,/path/p
                         exit 0 ;;
+                       #FTP Login Daten werden angezeigt 
 
       -l | --last )
                       stat -c "Filename : %n
@@ -34,15 +27,23 @@ while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do
                       mtime    : %y
                       ctime    : %z
 
-                      " *
-                        exit 0 ;; #anhängen als Kommentar
-
-
+                      " wget_backup.sh
+                        exit 0 ;;
+                        #letzter Zugriff auf die Datei wird angezeigt
+                        
+      -h | --man )   echo <<ADDTEXT
+NAME
+  wget_backup - The Backup Solution for Webcontent.
+SYNOPSIS
+  Synopsis: wget_backup.sh <backupdir>
+DESCRIPTION
+  adfsf
+ADDTEXT
+                        exit 0 ;;
   esac
   shift
 
 done
-
 
 if [ $# == 0 ] ; then
  grep Synopsis\: $0 | cut -c 2-
@@ -68,8 +69,7 @@ while [[ -n $1 ]] ; do
 # hinter Aufruf angeben sprich als erster Parameter. ./backup.sh <nameofdir>
 
   read -p "Press [Enter] key to start backup ... - reset with strg+c"
-
-
+  
 #-r rekursiver Download
 #-l level Tiefe 0=unlimit
 #-nH deaktivieren der Generierung von Verzeichnissen mit Hostpräfix
@@ -77,20 +77,23 @@ while [[ -n $1 ]] ; do
 #-nc Downloads überspringen, die bestehende Dateien überschreiben würden
 #-q quiet keine Statusmeldungen
 #--cut-dirs 'number' eltern verzeichnisse ignorieren
-  echo wget -r -l 0 -nH -np -nc --cut-dirs=2 ftp://$user:$pass@$ftp_server$path
-  date > date.txt
-
+  wget -r -l 0 -nH -np -nc --cut-dirs=2 ftp://$user:$pass@$ftp_server$path
+  echo "Start mysqldump ...\n"
+  mysqldump -u$dbUser -p$dbPassword -h $dbServer $dbName > $dbName.sql
+  echo "-- Dump completed -- "
+  
 # ein Verzeichnis zurück sonst wird es nicht gefunden
   cd ..
 
   echo "Compress the backup folder to .tar ..."
 # Backup Ordner komprimieren
-  echo tar -czf $user-$(date +%Y%m%d-%H%M%S).tar.gz $1
+  tar -czf $user-$(date +%Y%m%d-%H%M%S).tar.gz $1
 
   echo "############################"
   echo "DONE!  " "Backup created "$user-$(date +%Y%m%d-%H%M%S).tar.gz" at -> " $1
   echo "############################"
   shift
+  
 done
 exit 0
 
